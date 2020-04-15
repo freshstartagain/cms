@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-// use Auth;
+use Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -20,66 +20,93 @@ class UserController extends Controller
     public function show()
     {
         $user = User::find(Auth::user()->id);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $user,
-        ]);
+        
+        return $this->createDataResponse($status="success", $data=$user);
     }
 
-    public function register(Request $request)
+    public function store(Request $request)
     {
-        $name = $request->input('name');
-        $email = $request->input('email');
-        $password = bcrypt($request->input('password'));
 
-        $user = new User();
+        $validate = Validator::make($request->all(), array(
+            "firstname" => "required|min:2",
+            "middlename" => "required|min:2",
+            "lastname" => "required|min:2",
+            "email" => "required|email|unique:user",
+            "username" => "required|alpha_num|unique:user",
+            "password" => "required|confirmed|alpha_num",
+            "mobile" => "required|digits:10",
+        ));
 
-        $user->name = $name;
-        $user->email = $email;
-        $user->password = $password;
+        if($validate->fails())
+        {
+            return $this->createMessageResponse($status="error", $message=$validate->errors());
+        }
 
+        $user_data = array(
+            "firstname" => $request->firstname,
+            "middlename" => $request->middlename,
+            "lastname" => $request->lastname,
+            "email" => $request->email,
+            "username" => $request->username,
+            "mobile" => $request->mobile,
+            "password"=> bcrypt($request->password),
+            "address_id" => 4,
+            "position_id" => 3
+        );
+
+        $user = User::create($user_data);
         $user->save();
 
-        return response()->json([
-            'success'
-        ], 200);
+        return $this->createDataResponse($status="success", $data=$user, $response_code=201);
+
     }
 
     public function login(Request $request)
     {
-        $credentials = request(['email', 'password']);
+        $credentials = $request->only(["username", "password"]);
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return $this->createMessageResponse($status="success", $message="Unauthorized");
         }
 
-        return $this->respondWithToken($token);
+        $data = array(
+            "access_token" => $token,
+            "token_type" => "Bearer",
+        );
+
+        return $this->createDataResponse($status="success", $data=$data);
+
     }
 
     public function logout(Request $request)
     {
         auth()->logout();
-        return response()->json([
-            'status' => 'success',
-            'msg' => 'Logged out Successfully.'
-        ], 200);
+        return $this->createMessageResponse($status="success", $message="Logged out Successfully.");
     }
-
 
     public function refresh(Request $request)
     {
-        return $this->respondWithToken(auth()->refresh());
+        $data = array(
+            "access_token" => auth()->refresh(),
+            "token_type" => "Bearer",
+        );
+
+        return $this->createDataResponse($status="success", $data=$data);
     }
 
-
-    protected function respondWithToken($token)
+    private function createDataResponse($status, $data, $response_code = 200)
     {
-        return response()->json([
-            'status' => 'success',
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ], 200);
+        return response()->json(array(
+            "status" => $status,
+            "data" => $data
+        ), $response_code);
+    }
+
+    private function createMessageResponse($status="error", $message, $response_code = 401)
+    {
+        return response()->json(array(
+            "status" => $status,
+            "message" => $message,
+        ), $response_code);
     }
 }

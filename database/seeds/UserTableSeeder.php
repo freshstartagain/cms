@@ -51,7 +51,8 @@ class UserTableSeeder extends Seeder
 
     }
 
-    private function createUser($user){
-        User::create($user);
+    private function createUser($user_data){
+        $user = User::create($user_data);
+        $user->save();
     }
 }
