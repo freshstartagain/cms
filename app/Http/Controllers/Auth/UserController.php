@@ -20,11 +20,8 @@ class UserController extends Controller
     public function show()
     {
         $user = User::find(Auth::user()->id);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $user,
-        ]);
+        
+        return $this->createResponse($status="success", $data=$user);
     }
 
     public function register(Request $request)
@@ -48,38 +45,43 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = request(['email', 'password']);
+        $credentials = $request->only(['username', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return $this->createResponse($status="error", $data="", $message="Unauthorized", $response_code=401);
         }
 
-        return $this->respondWithToken($token);
+        $data = array(
+            "access_token" => $token,
+            "token_type" => "Bearer",
+        );
+
+        return $this->createResponse($status="success", $data=$data);
+
     }
 
     public function logout(Request $request)
     {
         auth()->logout();
-        return response()->json([
-            'status' => 'success',
-            'msg' => 'Logged out Successfully.'
-        ], 200);
+        return $this->createResponse($status="success", $message="Logged out Successfully.");
     }
-
 
     public function refresh(Request $request)
     {
-        return $this->respondWithToken(auth()->refresh());
+        $data = array(
+            "access_token" => auth()->refresh(),
+            "token_type" => "Bearer",
+        );
+
+        return $this->createResponse($status="success", $data=$data);
     }
 
-
-    protected function respondWithToken($token)
+    private function createResponse($status, $data="", $message="", $response_code = 200)
     {
         return response()->json([
-            'status' => 'success',
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ], 200);
+            "status" => $status,
+            "message" => $message,
+            "data" => $data
+        ], $response_code);
     }
 }
