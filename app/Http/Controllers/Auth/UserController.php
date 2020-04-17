@@ -81,7 +81,7 @@ class UserController extends Controller
     public function logout(Request $request)
     {
         auth()->logout();
-        return $this->createMessageResponse($status="success", $message="Logged out Successfully.");
+        return $this->createMessageResponse($status="success", $message="Logged out Successfully.", $response_code=200);
     }
 
     public function refresh(Request $request)
