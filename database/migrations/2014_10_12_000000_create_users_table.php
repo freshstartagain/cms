@@ -22,10 +22,10 @@ class CreateUsersTable extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->string('mobile',12);
-            $table->integer('address_id')->unsigned();
-            $table->integer('position_id')->unsigned();
-            $table->foreign('address_id')->references('id')->on('address')->onDelete('cascade');
-            $table->foreign('position_id')->references('id')->on('position')->onDelete('cascade');
+            $table->bigInteger('address_id')->unsigned();
+            $table->bigInteger('position_id')->unsigned();
+            // $table->foreign('address_id')->references('id')->on('address')->onDelete('cascade');
+            // $table->foreign('position_id')->references('id')->on('position')->onDelete('cascade');
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
