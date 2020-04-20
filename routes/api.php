@@ -27,9 +27,9 @@ Route::prefix('v1')->group(function(){
         Route::prefix('user')->group(function(){
             // User Address
             Route::get('{id}/address', 'User\AddressController@show');
-            Route::post('{id}/address', 'User\AddressController@index');
-            Route::put('{id}/address', 'User\AddressController@index');
-            Route::delete('{id}/address', 'User\AddressController@index');
+            Route::post('{id}/address', 'User\AddressController@store');
+            Route::put('{id}/address', 'User\AddressController@update');
+            Route::delete('{id}/address', 'User\AddressController@destroy');
         });
     });
     
