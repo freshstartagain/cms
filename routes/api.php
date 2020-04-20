@@ -17,6 +17,7 @@ Route::prefix('v1')->group(function(){
     });
 
     Route::middleware('auth')->group(function(){
+        // Address
         Route::get('street','Address\AddressController@street');
         Route::get('barangay','Address\AddressController@barangay');
         Route::get('municipal','Address\AddressController@municipal');
@@ -24,11 +25,11 @@ Route::prefix('v1')->group(function(){
         Route::get('region','Address\AddressController@region');
 
         Route::prefix('user')->group(function(){
-            // Address
-            Route::get('{id}/address', 'Address\UserAddressController@index');
-            Route::post('{id}/address', 'Address\UserAddressController@index');
-            Route::put('{id}/address', 'Address\UserAddressController@index');
-            Route::delete('{id}/address', 'Address\UserAddressController@index');
+            // User Address
+            Route::get('{id}/address', 'User\AddressController@show');
+            Route::post('{id}/address', 'User\AddressController@index');
+            Route::put('{id}/address', 'User\AddressController@index');
+            Route::delete('{id}/address', 'User\AddressController@index');
         });
     });
     
